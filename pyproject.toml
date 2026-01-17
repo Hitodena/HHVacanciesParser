@@ -12,6 +12,23 @@ dependencies = [
     "playwright>=1.57.0",
     "playwright-stealth>=2.0.0",
     "pydantic>=2.12.5",
+    "pydantic-settings>=2.12.0",
     "redis>=7.1.0",
     "uvicorn>=0.40.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+markers = [
+    "db: mark test as database test",
+    "browser: mark test as browser test that requires a browser or http client to be opened"
+
+]
+env = [
+    "ENV_FILE=.env.test",
 ]
