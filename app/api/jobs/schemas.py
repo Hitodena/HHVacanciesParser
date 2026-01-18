@@ -7,12 +7,16 @@ from ...models import EmailAuth, PhoneAuth
 
 
 class JobSubmitEmailRequest(EmailAuth):
-    search_query: str = Field(default="system analyst", max_length=200)
+    search_query: str = Field(
+        default="system analyst", max_length=200, min_length=1
+    )
     max_applications: int = Field(default=200, ge=1, le=200)
 
 
 class JobSubmitPhoneRequest(PhoneAuth):
-    search_query: str = Field(default="system analyst", max_length=200)
+    search_query: str = Field(
+        default="system analyst", max_length=200, min_length=1
+    )
     max_applications: int = Field(default=200, ge=1, le=200)
 
 
@@ -56,7 +60,7 @@ class JobStatusResponse(BaseModel):
 
 class JobCancelResponse(BaseModel):
     task_id: str
-    status: Literal["cancelled"] = "cancelled"
+    status: Literal["cancelled", "finished"] = "cancelled"
     message: str = "Task cancelled"
 
     class Config:

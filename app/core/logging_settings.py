@@ -5,7 +5,7 @@ from loguru import logger
 
 from ..custom_types import LogLevel
 from .env import EnvironmentSettings
-from .toml import Logs
+from .settings import Logs
 
 
 class LoggerSettings:

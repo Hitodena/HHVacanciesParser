@@ -25,6 +25,7 @@ class EnvironmentSettings(BaseSettings):
     celery_cache: str = Field(default="redis://localhost:6379/3")
 
     cors_allow_origins: Sequence[str] = Field(default=["*"])
+    cors_allow_credentials: bool = Field(default=True)
 
     log_console_formatter: str = Field(
         default="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
@@ -39,17 +40,3 @@ class EnvironmentSettings(BaseSettings):
         "{name}:{function}:{line} | "
         "{message} | {extra}"
     )
-
-
-class ProdSettings(EnvironmentSettings):
-    debug: bool = Field(default=False)
-    log_level: LogLevel = Field(default=LogLevel.INFO)
-    cors_allow_origins: Sequence[str] = Field(default=["*"])
-    cors_allow_credentials: bool = Field(default=True)
-
-
-class DevSettings(EnvironmentSettings):
-    debug: bool = Field(default=True)
-    log_level: LogLevel = Field(default=LogLevel.DEBUG)
-    cors_allow_origins: Sequence[str] = Field(default=["*"])
-    cors_allow_credentials: bool = Field(default=True)

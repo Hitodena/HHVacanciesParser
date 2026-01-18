@@ -79,19 +79,27 @@ class Selectors(BaseModel):
     vacancy_applied: str = Field(
         "Вы откликнулись", description="Text indicating successful application"
     )
+    additional_quest: str = Field(
+        default="Для отклика необходимо ответить на несколько вопросов работодателя",
+        description="Message indicating additional questions are required for application",
+    )
+    cover_letter_text: str = Field(
+        default="Сопроводительное письмо обязательное для этой вакансии",
+        description="Message indicating cover letter is required for this vacancy",
+    )
+    cover_letter_input: str = Field(
+        default="[data-qa='vacancy-response-letter-input']",
+        description="Input field for cover letter",
+    )
 
     # Error Messages
     login_error: str = Field(
         default="Неправильные данные для входа. Пожалуйста, попробуйте снова.",
         description="Error message for incorrect login credentials",
     )
-    captcha_message_one: str = Field(
-        default="Пройдите капчу",
-        description="Error message requiring CAPTCHA (variant 1)",
-    )
-    captcha_message_two: str = Field(
-        default="Пожалуйста, подтвердите, что вы не робот",
-        description="Error message requiring CAPTCHA (variant 2)",
+    captcha_alt_text: str = Field(
+        default="captcha",
+        description="Alt text for CAPTCHA image",
     )
     vacancy_not_found: str = Field(
         default="Попробуйте другие варианты поискового запроса или уберите фильтры",

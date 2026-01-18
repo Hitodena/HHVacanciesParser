@@ -208,6 +208,15 @@ async def cancel_job(task_id: str, celery: CeleryDep):
     if result.state == "PENDING" and not result.info:
         raise TaskNotFoundException(task_id)
 
+    # If task is already completed, no need to cancel
+    if result.state == "SUCCESS":
+        logger.bind(task_id=task_id).info(
+            "Task already completed, no cancellation needed"
+        )
+        return JobCancelResponse(
+            task_id=task_id, message="Already finished", status="finished"
+        )
+
     # Cancel task
     celery.control.revoke(task_id, terminate=True)
 

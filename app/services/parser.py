@@ -101,7 +101,9 @@ async def process_job_search(
             progress = 30 + ((i + 1) / len(total_vacancies)) * 70
 
             try:
-                success = await apply_to_vacancy(page, vacancy_url, config)
+                success = await apply_to_vacancy(
+                    page, vacancy_url, config, credentials
+                )
                 if success:
                     applied_count += 1
                     result.applied = applied_count

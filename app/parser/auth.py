@@ -39,7 +39,9 @@ async def login_with_email(
         no_wait_after=False,
     )
 
-    email_option = page.get_by_text(config.selectors.email_option, exact=True)
+    email_option = page.get_by_text(
+        config.selectors.email_option, exact=True
+    ).first
     await safe_click(
         email_option,
         config.selectors.email_option,
@@ -72,6 +74,11 @@ async def login_with_email(
         timeout=config.timeouts.element_timeout * 1000,
         no_wait_after=False,
     )
+
+    await page.wait_for_load_state(
+        "domcontentloaded", timeout=config.timeouts.connection_timeout * 1000
+    )
+    await asyncio.sleep(config.network.sleep_between_actions)
 
     if await check_captcha(page, config):
         logger.error("Captcha detected during email login.")
@@ -153,6 +160,11 @@ async def login_with_phone(
         timeout=config.timeouts.element_timeout * 1000,
         no_wait_after=False,
     )
+
+    await page.wait_for_load_state(
+        "domcontentloaded", timeout=config.timeouts.connection_timeout * 1000
+    )
+    await asyncio.sleep(config.network.sleep_between_actions)
 
     if await check_captcha(page, config):
         logger.error("Captcha detected during phone login.")

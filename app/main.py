@@ -1,29 +1,33 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from .api import api_router
 from .core import load
 
 config = load()
+print(config)
 
 app = FastAPI(
     title="HH Auto Apply API",
     version="1.0.0",
 )
 
-# CORS (если нужен фронтенд)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=config.environment.cors_allow_origins,
-    allow_credentials=True,
+    allow_credentials=config.environment.cors_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(api_router)
 
+# Serve static files
+app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
 
-@app.get("/", tags=["root"])
+
+@app.get("/api/", tags=["root"])
 async def root():
     return {
         "message": "HH Auto Apply API",

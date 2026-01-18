@@ -6,18 +6,24 @@ from playwright.async_api import Page, expect
 
 from ..core import Config
 from ..exceptions import CaptchaError
+from ..models import AuthCredentials
 from ..utils.click_utils import safe_click
-from .checks import check_captcha
+from .checks import (
+    check_additional_questions,
+    check_captcha,
+    check_required_letter,
+)
 
 
 async def apply_to_vacancy(
-    page: Page, vacancy_url: str, config: Config
+    page: Page, vacancy_url: str, config: Config, credentials: AuthCredentials
 ) -> bool:
     """Apply to a vacancy on the given page.
     Args:
         page (Page): The Playwright page to apply on.
         vacancy_url (str): The URL of the vacancy to apply to.
         config (Config): The application configuration.
+        credentials (AuthCredentials): The authentication credentials.
     Returns:
         bool: True if the application was successful, False otherwise.
     Raises:
@@ -45,6 +51,12 @@ async def apply_to_vacancy(
     if await check_captcha(page, config):
         logger.error("Captcha detected during vacancy application.")
         raise CaptchaError("Captcha detected during vacancy application.")
+
+    if await check_additional_questions(page, config):
+        return False
+
+    if not await check_required_letter(page, config, credentials):
+        return False
 
     await close_application_modal(page, config)
 
@@ -77,7 +89,7 @@ async def close_application_modal(page: Page, config: Config) -> None:
     try:
         logger.debug("Looking for application modal window")
         modal_window = page.locator(config.selectors.additional_info)
-        await expect(modal_window).to_be_visible(timeout=2000)
+        await expect(modal_window).to_be_visible()
 
         close_button = page.locator(config.selectors.additional_info_close)
         await safe_click(
