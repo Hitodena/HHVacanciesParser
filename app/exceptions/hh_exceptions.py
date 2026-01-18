@@ -1,4 +1,4 @@
-from app.types import ErrorCodes
+from ..custom_types import ErrorCodes
 
 RETRYABLE = {
     ErrorCodes.NetworkErrors.TIMEOUT,

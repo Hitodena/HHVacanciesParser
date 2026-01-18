@@ -1,4 +1,4 @@
-from app.exceptions.hh_exceptions import (
+from .hh_exceptions import (
     AuthCredentialsError,
     CaptchaError,
     HHParserError,

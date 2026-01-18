@@ -5,25 +5,24 @@ from fake_useragent import UserAgent
 from loguru import logger
 from playwright.async_api import (
     Browser,
-    BrowserContext,
     Page,
     Playwright,
     async_playwright,
 )
 
-from app.core import EnvironmentSettings
+from ..core import Config
 
 
 class BrowserManager:
     """Browser manager for Playwright."""
 
-    def __init__(self, settings: EnvironmentSettings) -> None:
+    def __init__(self, config: Config) -> None:
         self._ua = UserAgent(
             browsers=["Chrome", "Google"],
             os=["Windows"],
             platforms=["desktop"],
         )
-        self.headless = not settings.debug
+        self.headless = not config.environment.debug
 
         self._playwright: Playwright | None = None
         self._browser: Browser | None = None
@@ -73,7 +72,7 @@ class BrowserManager:
     @asynccontextmanager
     async def context(
         self, proxy: dict | None = None
-    ) -> AsyncGenerator[tuple[BrowserContext, Page], None]:
+    ) -> AsyncGenerator[Page, None]:
         if not self._browser:
             logger.error("Browser is not started")
             raise RuntimeError(
@@ -121,7 +120,7 @@ class BrowserManager:
 
         try:
             logger.bind(proxy=proxy).info("Context and page created")
-            yield context, page
+            yield page
         finally:
             await page.close()
             await context.close()

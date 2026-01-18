@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field, SecretStr
 
-from app.types import HHCountryRegions
+from ..custom_types import HHCountryRegions
 
 
 class EmailAuth(BaseModel):

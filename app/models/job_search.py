@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from app.types import JobSearchStatus
+from ..custom_types import JobSearchStatus
 
 
 class JobSearchResult(BaseModel):

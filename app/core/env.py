@@ -3,8 +3,8 @@ from typing import Sequence
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app import ENV_FILE
-from app.types import AppEnvironment, LogLevel
+from .. import ENV_FILE
+from ..custom_types import AppEnvironment, LogLevel
 
 
 class EnvironmentSettings(BaseSettings):
@@ -12,12 +12,12 @@ class EnvironmentSettings(BaseSettings):
         env_file=ENV_FILE,
         env_file_encoding="utf-8",
         extra="ignore",
+        case_sensitive=False,
     )
 
     app_environment: AppEnvironment = Field(default=AppEnvironment.DEV)
-    debug: bool = Field(default=True)
     log_level: LogLevel = Field(default=LogLevel.DEBUG)
-    file_log_level: LogLevel = Field(default=LogLevel.INFO)
+    debug: bool = Field(default=True)
 
     redis_url: str = Field(default="redis://localhost:6379")
     celery_broker_url: str = Field(default="redis://localhost:6379/1")

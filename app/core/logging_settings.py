@@ -1,24 +1,28 @@
 import sys
 from pathlib import Path
-from typing import List
 
 from loguru import logger
 
-from app.core.env import EnvironmentSettings
-from app.types import LogLevel
+from ..custom_types import LogLevel
+from .env import EnvironmentSettings
+from .toml import Logs
 
 
 class LoggerSettings:
     def __init__(
-        self, settings: EnvironmentSettings, modules: List[str] | None = None
+        self,
+        log_settings: Logs,
+        settings: EnvironmentSettings,
+        modules: list[str] | None = None,
     ):
+        self.log_settings = log_settings
         self.settings = settings
         self.modules = modules
         self.setup_logger()
 
     def setup_logger(self) -> None:
         log_level = self.settings.log_level
-        file_level = self.settings.file_log_level
+        file_level = self.log_settings.file_log_level
         console_format = self.settings.log_console_formatter
         file_format = self.settings.log_file_formatter
         rotation = "10 MB"
