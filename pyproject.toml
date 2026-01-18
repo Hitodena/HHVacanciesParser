@@ -24,11 +24,7 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 pythonpath = ["."]
 asyncio_mode = "auto"
-markers = [
-    "db: mark test as database test",
-    "browser: mark test as browser test that requires a browser or http client to be opened"
-
-]
+markers = []
 env = [
     "ENV_FILE=.env.test",
 ]

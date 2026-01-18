@@ -90,21 +90,36 @@ async def check_required_letter(
     Returns:
         bool: True if cover questions passed down or there is no questions, False otherwise.
     """
-    logger.debug("Checking for required cover letter")
+    logger.bind(vacancy_url=page.url).debug(
+        "Checking for required cover letter"
+    )
     try:
         required = page.get_by_text(
             config.selectors.cover_letter_text, exact=True
         )
         if await required.is_visible(timeout=1000):
+            logger.bind(vacancy_url=page.url).info(
+                "Additional letter required for a vacancy"
+            )
             if credentials.answer_req:
-                letter_input = page.locator(
+                dialog = page.get_by_role("dialog")
+                letter_input = dialog.locator(
                     config.selectors.cover_letter_input
                 )
                 await letter_input.fill(credentials.answer_req)
-                logger.debug("Filled cover letter")
+                logger.bind(vacancy_url=page.url).debug("Filled cover letter")
+                await dialog.locator(
+                    config.selectors.vacancy_response_popup
+                ).click(
+                    timeout=config.timeouts.element_timeout,
+                    no_wait_after=False,
+                )
+                logger.bind(vacancy_url=page.url).info(
+                    "Letter applied for a vacancy"
+                )
                 return True
             else:
-                logger.warning(
+                logger.bind(vacancy_url=page.url).warning(
                     "Cover letter required but not provided in credentials"
                 )
                 return False

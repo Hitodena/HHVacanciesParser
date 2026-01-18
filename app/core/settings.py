@@ -69,6 +69,9 @@ class Selectors(BaseModel):
         default="[data-qa='vacancy-response-link-top']",
         description="Button to respond to a vacancy",
     )
+    vacancy_response_popup: str = Field(
+        default="[data-qa='vacancy-response-submit-popup']"
+    )
     additional_info: str = Field(
         default="[data-qa='additional-data-collector__popup-title']",
         description="Popup with additional information when responding to a vacancy",
