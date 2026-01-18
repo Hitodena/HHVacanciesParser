@@ -2,6 +2,7 @@ import asyncio
 
 from celery import Task
 from loguru import logger
+from pydantic import TypeAdapter
 
 from ...custom_types import JobParserStage
 from ...models import AuthCredentials, JobSearchResult
@@ -20,7 +21,7 @@ class CallbackTask(Task):
 )
 def process_job_application(
     self,
-    credentials: AuthCredentials,
+    credentials: str,
     search_query: str,
     max_applications: int = 200,
 ) -> JobSearchResult:
@@ -32,18 +33,23 @@ def process_job_application(
         search_query: Search query
         max_applications: Maximum applications
     """
-    return asyncio.run(
+    loop = asyncio.get_event_loop()
+    return loop.run_until_complete(
         _process_async(self, credentials, search_query, max_applications)
     )
 
 
 async def _process_async(
     task,
-    credentials: AuthCredentials,
+    credentials: str,
     search_query: str,
     max_applications: int,
 ) -> JobSearchResult:
     """Asynchronous task processing"""
+
+    # Parse credentials from JSON str
+    adapter = TypeAdapter(AuthCredentials)
+    creds = adapter.validate_json(credentials)
 
     # Get context
     context = get_worker_context()
@@ -71,7 +77,7 @@ async def _process_async(
         result = await process_job_search(
             page=page,
             config=context.config,
-            credentials=credentials,
+            credentials=creds,
             search_query=search_query,
             max_applications=max_applications,
             progress_callback=progress_callback,

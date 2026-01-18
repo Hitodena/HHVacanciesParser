@@ -58,6 +58,18 @@ class LoggerSettings:
             diagnose=diagnose,
             enqueue=enqueue,
         )
+        logger.add(
+            log_dir / "app.log",
+            level=log_level,
+            format=file_format,
+            rotation=rotation,
+            retention=retention,
+            compression=compression,
+            serialize=serialize,
+            backtrace=backtrace,
+            diagnose=diagnose,
+            enqueue=enqueue,
+        )
 
         if self.modules:
             for module_name in self.modules:

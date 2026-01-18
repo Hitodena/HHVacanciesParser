@@ -61,7 +61,7 @@ async def login_with_email(
     )
 
     password_input = page.locator(config.selectors.password_input)
-    await password_input.fill(credentials.password.get_secret_value())
+    await password_input.fill(credentials.password)
 
     await asyncio.sleep(config.network.sleep_between_actions)
 
@@ -122,7 +122,7 @@ async def login_with_phone(
     )
 
     option_list = page.locator(config.selectors.region_list)
-    await option_list.get_by_label(credentials.country.value).click(
+    await option_list.get_by_text(credentials.country.value, exact=True).click(
         no_wait_after=False, timeout=config.timeouts.element_timeout * 1000
     )
 
@@ -142,7 +142,7 @@ async def login_with_phone(
     )
 
     password_input = page.locator(config.selectors.password_input)
-    await password_input.fill(credentials.password.get_secret_value())
+    await password_input.fill(credentials.password)
 
     await asyncio.sleep(config.network.sleep_between_actions)
 
@@ -181,9 +181,14 @@ async def login(
         AuthCredentialsError: If the login fails due to incorrect credentials.
         CaptchaError: If a captcha is detected on the page.
     """
+    logger.debug(
+        f"Login attempt with credentials type: {type(credentials)}, value: {credentials}"
+    )
     if isinstance(credentials, EmailAuth):
         await login_with_email(page, credentials, config)
     elif isinstance(credentials, PhoneAuth):
         await login_with_phone(page, credentials, config)
     else:
-        raise AuthCredentialsError("Unsupported authentication method.")
+        raise AuthCredentialsError(
+            f"Unsupported authentication method with type: {type(credentials)}, value: {credentials}."
+        )

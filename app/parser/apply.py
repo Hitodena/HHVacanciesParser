@@ -60,7 +60,8 @@ async def apply_to_vacancy(
             config.network.sleep_between_requests_max,
         )
         logger.bind(
-            vacancy_url=vacancy_url, next_application_s=next_application_delay
+            vacancy_url=vacancy_url,
+            next_application_s=round(next_application_delay, 2),
         ).success("Application successful")
         return True
     except Exception:

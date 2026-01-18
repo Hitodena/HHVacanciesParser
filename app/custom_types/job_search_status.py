@@ -15,3 +15,4 @@ class JobParserStage(StrEnum):
     PARSING = "parsing vacancies"
     APPLY = "apply"
     COMPLETE = "complete"
+    WAITING = "waiting"
