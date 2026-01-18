@@ -94,6 +94,7 @@ HH Parser is an automated job application tool for the HeadHunter (hh.ru) platfo
 
 - Ensure Docker has sufficient resources
 - Check internet connection for dependency downloads
+- Playwright browsers are downloaded during build (may take time on first build)
 
 ### Runtime Issues
 

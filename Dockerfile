@@ -45,14 +45,12 @@ CMD ["uv", "run", "-m", "app.main"]
 
 FROM base AS worker
 
-# Switch to root to install Playwright system dependencies
 USER root
 
-# Install Playwright browser dependencies (requires root)
 RUN uv run playwright install-deps chromium
 
-# Switch back to non-root user
 USER docker_user
 
-# Copy application code (from build context)
+RUN uv run playwright install chromium
+
 COPY --chown=docker_user:docker_user app ./app

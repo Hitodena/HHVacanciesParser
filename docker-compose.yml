@@ -16,6 +16,7 @@ services:
       retries: 5
 
   web:
+    container_name: hh_parser_web
     build:
       context: .
       dockerfile: Dockerfile
@@ -30,6 +31,7 @@ services:
       - hh_parser
 
   worker:
+    container_name: hh_parser_worker
     build:
       context: .
       dockerfile: Dockerfile
@@ -38,6 +40,7 @@ services:
       - redis
     env_file:
       - .env
+    restart: unless-stopped
     command:
       [
         "uv",
@@ -48,6 +51,7 @@ services:
         "worker",
         "--loglevel=info",
         "--queues=hh_parsing_queue",
+        "--concurrency=1",
       ]
     networks:
       - hh_parser

@@ -6,7 +6,6 @@ from .api import api_router
 from .core import load
 
 config = load()
-print(config)
 
 app = FastAPI(
     title="HH Auto Apply API",
