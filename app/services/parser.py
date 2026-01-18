@@ -1,12 +1,17 @@
 import asyncio
 import random
+from typing import Callable
 
 from loguru import logger
 from playwright.async_api import Page
 
 from ..core import Config
-from ..custom_types import JobSearchStatus
-from ..exceptions import CaptchaError, NoVacanciesFoundError
+from ..custom_types import JobParserStage, JobSearchStatus
+from ..exceptions import (
+    AuthCredentialsError,
+    CaptchaError,
+    NoVacanciesFoundError,
+)
 from ..models import AuthCredentials, JobSearchResult
 from ..parser import (
     apply_to_vacancy,
@@ -23,6 +28,7 @@ async def process_job_search(
     credentials: AuthCredentials,
     search_query: str,
     max_applications: int,
+    progress_callback: Callable | None = None,
 ) -> JobSearchResult:
     """Process a job search workflow including login, search, parsing, and applications.
 
@@ -36,6 +42,7 @@ async def process_job_search(
         credentials (AuthCredentials): The authentication credentials for login.
         search_query (str): The search query string for job vacancies.
         max_applications (int, optional): Maximum number of applications to attempt. Defaults to 200.
+        progress_callback (Callable): Function to update celery task progress
 
     Returns:
         JobSearchResult: The result of the job search process, including status, applied count, total vacancies, and progress.
@@ -47,17 +54,25 @@ async def process_job_search(
     applied_count = 0
     total_vacancies = []
     result = JobSearchResult(
-        status=JobSearchStatus.SUCCESS, applied=0, total=0, progress=0.0
+        status=JobSearchStatus.STARTED, applied=0, total=0, progress=0.0
     )
+
+    def update_progress(stage: JobParserStage, progress: float, **kwargs):
+        """Update current progress and callback"""
+        result.progress = progress
+        if progress_callback:
+            progress_callback(stage=stage, progress=progress, **kwargs)
 
     try:
         # 1. Authorization
+        update_progress(JobParserStage.AUTH, 5)
         await login(page, credentials, config)
-        result.progress = 10
+        update_progress(JobParserStage.AUTH, 10)
 
         # 2. Job search
+        update_progress(JobParserStage.SEARCH, 15)
         await search_vacancies(page, search_query, config)
-        result.progress = 20
+        update_progress(JobParserStage.SEARCH, 20)
 
         # 3. Parsing vacancies with pagination
         current_page = 1
@@ -79,7 +94,7 @@ async def process_job_search(
         # Limit the number
         total_vacancies = total_vacancies[:max_applications]
         result.total = len(total_vacancies)
-        result.progress = 30
+        update_progress(JobParserStage.PARSING, 30, total=len(total_vacancies))
 
         # 4. Applications
         for i, vacancy_url in enumerate(total_vacancies):
@@ -95,7 +110,12 @@ async def process_job_search(
             except Exception:
                 pass
 
-            result.progress = progress
+            update_progress(
+                JobParserStage.APPLY,
+                progress=progress,
+                applied=applied_count,
+                total=len(total_vacancies),
+            )
 
             # Delay between applications
             delay = random.uniform(
@@ -104,11 +124,17 @@ async def process_job_search(
             )
             await asyncio.sleep(delay)
 
-        result.progress = 100.0
+        update_progress(JobParserStage.COMPLETE, 100, applied=applied_count)
+        result.status = JobSearchStatus.SUCCESS
         return result
 
     except CaptchaError as exc:
         result.status = JobSearchStatus.CAPTCHA_REQUIRED
+        result.message = str(exc)
+        result.applied = applied_count
+        return result
+    except AuthCredentialsError as exc:
+        result.status = JobSearchStatus.INVALID_CREDENTIALS
         result.message = str(exc)
         result.applied = applied_count
         return result
